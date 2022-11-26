@@ -1,0 +1,26 @@
+.DS_Store
+.env
+env/
+build/
+.idea/
+*.iml
+.vs/
+.vscode
+node_modules/
+debug.[jt]s
+
+# Coverage reports
+htmlcov/
+coverage/
+.coverage.*
+*,cover
+
+# Generated files
+*.js.map
+*.d.ts
+/lib/**/*.js
+/bin/*.js
+/__tests__/*.js
+
+# stryker temp files
+/stryker-tmp
