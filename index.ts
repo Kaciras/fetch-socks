@@ -1,25 +1,16 @@
-import tls from "tls";
-import { buildConnector } from "undici";
-import { SocksClient } from "socks";
+import * as tls from "tls";
+import { SocksClient, SocksProxy } from "socks";
+import { buildConnector, Agent } from "undici";
 
 function resolvePort(protocol: string, port: string) {
 	return port ? Number.parseInt(port) : protocol === "http:" ? 80 : 443;
 }
 
-export function socksConnector(
-	socksHost: string,
-	socksPort: number,
-	version: 4 | 5,
-	tlsOptions?: any,
-): buildConnector.connector {
+export function socksConnector(proxy: SocksProxy, tlsOptions?: any): buildConnector.connector {
 	return async (options, callback) => {
 		const { protocol, hostname, port } = options;
 		SocksClient.createConnection({
-			proxy: {
-				host: socksHost,
-				port: socksPort,
-				type: version,
-			},
+			proxy,
 			command: "connect",
 			destination: {
 				host: hostname,
@@ -46,4 +37,13 @@ export function socksConnector(
 				.on(connectEvent, () => callback(null, socket));
 		});
 	};
+}
+
+interface SocksDispatcherOptions extends Agent.Options {
+	proxy: SocksProxy;
+}
+
+export function socksDispatcher(options: SocksDispatcherOptions) {
+	const { connect, proxy, ...rest } = options;
+	return new Agent({ ...rest, connect: socksConnector(proxy, connect) });
 }
