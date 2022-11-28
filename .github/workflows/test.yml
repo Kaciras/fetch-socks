@@ -1,0 +1,24 @@
+name: Test
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 19
+
+      - uses: actions/checkout@v3
+
+      - run: npm i -g pnpm
+
+      - run: pnpm install
+
+      - run: pnpm compile
+
+      - run: pnpm run test
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
