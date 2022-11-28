@@ -18,9 +18,8 @@ coverage/
 # Generated files
 *.js.map
 *.d.ts
-/lib/**/*.js
-/bin/*.js
-/__tests__/*.js
+/index.js
+/index.spec.js
 
 # stryker temp files
 /stryker-tmp

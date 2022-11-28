@@ -1,5 +1,8 @@
 # fetch-socks
 
+[![npm package](https://img.shields.io/npm/v/fetch-socks.svg)](https://npmjs.com/package/fetch-socks)
+[![Test](https://github.com/Kaciras/fetch-socks/actions/workflows/test.yml/badge.svg)](https://github.com/Kaciras/fetch-socks/actions/workflows/test.yml)
+
 Socks proxy for Node builtin (also [undici](https://github.com/nodejs/undici)) `fetch`.
 
 ```shell
