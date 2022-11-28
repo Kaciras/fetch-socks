@@ -26,19 +26,13 @@ export function socksConnector(proxies: SocksProxy | SocksProxy[], tlsOptions?: 
 			}
 			let { socket } = connection!;
 
-			let connectEvent = "connect";
-			if (protocol === "https:") {
-				socket = tls.connect({
-					...tlsOptions,
-					socket,
-					servername: hostname,
-				});
-				connectEvent = "secureConnect";
+			if (protocol !== "https:") {
+				return callback(null, socket);
 			}
 
-			socket
-				.on("error", error => callback(error, null))
-				.on(connectEvent, () => callback(null, socket));
+			socket = tls.connect({ ...tlsOptions, socket, servername: hostname });
+			socket.on("error", error => callback(error, null))
+				.on("secureConnect", () => callback(null, socket));
 		};
 
 		if (Array.isArray(proxies)) {
@@ -51,7 +45,7 @@ export function socksConnector(proxies: SocksProxy | SocksProxy[], tlsOptions?: 
 	};
 }
 
-interface SocksDispatcherOptions extends Agent.Options {
+export interface SocksDispatcherOptions extends Agent.Options {
 	proxy: SocksProxy | SocksProxy[];
 }
 
