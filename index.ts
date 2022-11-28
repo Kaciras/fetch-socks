@@ -1,6 +1,5 @@
-import * as tls from "tls";
 import { SocksClient, SocksProxy } from "socks";
-import { buildConnector, Agent } from "undici";
+import { Agent, buildConnector } from "undici";
 
 type onEstablished = Parameters<typeof SocksClient.createConnection>[1];
 
@@ -9,6 +8,8 @@ function resolvePort(protocol: string, port: string) {
 }
 
 export function socksConnector(proxies: SocksProxy | SocksProxy[], tlsOptions?: any): buildConnector.connector {
+	const tlsUpgrade = buildConnector(tlsOptions ?? {});
+
 	return async (options, callback) => {
 		const { protocol, hostname, port } = options;
 
@@ -24,16 +25,12 @@ export function socksConnector(proxies: SocksProxy | SocksProxy[], tlsOptions?: 
 			if (error) {
 				return callback(error, null);
 			}
-			let { socket } = connection!;
-			socket.setNoDelay();
+			const { socket } = connection!;
 
 			if (protocol !== "https:") {
-				return callback(null, socket);
+				return callback(null, socket.setNoDelay());
 			}
-
-			socket = tls.connect({ ...tlsOptions, socket, servername: hostname });
-			socket.on("error", error => callback(error, null))
-				.on("secureConnect", () => callback(null, socket));
+			return tlsUpgrade({ ...options, httpSocket: socket } as any, callback);
 		};
 
 		if (Array.isArray(proxies)) {
