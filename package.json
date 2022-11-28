@@ -3,12 +3,26 @@
 	"version": "1.0.0",
 	"description": "Socks proxy for Node builtin `fetch`",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Kaciras/fetch-socks"
+	},
+	"keywords": [
+		"fetch",
+		"socks",
+		"proxy",
+		"undici"
+	],
 	"files": [
 		"index.js",
 		"index.d.ts"
 	],
 	"main": "index.js",
 	"types": "index.d.ts",
+	"scripts": {
+		"lint": "eslint --fix .",
+		"test": "jest"
+	},
 	"dependencies": {
 		"socks": "^2.7.1",
 		"undici": "^5.13.0"
