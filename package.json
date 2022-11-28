@@ -1,8 +1,14 @@
 {
 	"name": "fetch-socks",
-	"version": "0.1.0",
-	"description": "Socks proxy for node builtin `fetch`",
+	"version": "1.0.0",
+	"description": "Socks proxy for Node builtin `fetch`",
 	"license": "MIT",
+	"files": [
+		"index.js",
+		"index.d.ts"
+	],
+	"main": "index.js",
+	"types": "index.d.ts",
 	"dependencies": {
 		"socks": "^2.7.1",
 		"undici": "^5.13.0"
