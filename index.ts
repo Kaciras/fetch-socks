@@ -25,6 +25,7 @@ export function socksConnector(proxies: SocksProxy | SocksProxy[], tlsOptions?: 
 				return callback(error, null);
 			}
 			let { socket } = connection!;
+			socket.setNoDelay();
 
 			if (protocol !== "https:") {
 				return callback(null, socket);
