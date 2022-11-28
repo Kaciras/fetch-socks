@@ -6,11 +6,18 @@ function resolvePort(protocol: string, port: string) {
 	return port ? Number.parseInt(port) : protocol === "http:" ? 80 : 443;
 }
 
-export function socksConnector(proxy: SocksProxy, tlsOptions?: any): buildConnector.connector {
+export function socksConnector(
+	socks: SocksProxy | SocksProxy[],
+	tlsOptions?: any,
+): buildConnector.connector {
+	const proxies = Array.isArray(socks) ? socks : [socks];
+
 	return async (options, callback) => {
 		const { protocol, hostname, port } = options;
-		SocksClient.createConnection({
-			proxy,
+
+		// noinspection ES6MissingAwait
+		SocksClient.createConnectionChain({
+			proxies,
 			command: "connect",
 			destination: {
 				host: hostname,
@@ -40,7 +47,7 @@ export function socksConnector(proxy: SocksProxy, tlsOptions?: any): buildConnec
 }
 
 interface SocksDispatcherOptions extends Agent.Options {
-	proxy: SocksProxy;
+	proxy: SocksProxy | SocksProxy[];
 }
 
 export function socksDispatcher(options: SocksDispatcherOptions) {
