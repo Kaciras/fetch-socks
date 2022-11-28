@@ -1,105 +1,116 @@
-const createConnectionChain = jest.fn();
-
-jest.mock("socks", () => ({
-	SocksClient: { createConnectionChain },
-}));
-
-import { Socket } from "net";
-import { afterEach, beforeEach, expect, it, jest } from "@jest/globals";
-import { getLocal, Mockttp } from "mockttp";
+import * as net from "net";
+import { afterAll, afterEach, beforeEach, expect, it } from "@jest/globals";
+import { createProxyServer, waitForConnect } from "@e9x/simple-socks";
+import { getLocal, MockttpOptions } from "mockttp";
 import { fetch } from "undici";
 import { socksDispatcher } from "./index";
 
-const httpServer = getLocal();
-beforeEach(async () => {
-	await httpServer.start();
-	await httpServer.forGet("/foobar").thenReply(200, "__RESPONSE_DATA__");
-});
-afterEach(() => httpServer.stop());
+function setupHttpServer(options?: MockttpOptions) {
+	const server = getLocal(options);
+	beforeEach(() => server.start());
+	afterEach(() => server.stop());
+	return server;
+}
 
-const secureServer = getLocal({
+function setupSocksServer(options: any = {}) {
+	let laseSocket: net.Socket;
+
+	options.connect = async (port: number, host: string) => {
+		laseSocket = net.connect(port, host);
+		await waitForConnect(laseSocket);
+		return laseSocket;
+	};
+	const server = createProxyServer(options);
+	server.listen();
+	afterAll(() => void server.close());
+
+	return {
+		getLastSocket: () => laseSocket,
+		...server.address() as net.AddressInfo,
+	};
+}
+
+const httpServer = setupHttpServer();
+
+const secureServer = setupHttpServer({
 	https: {
 		keyPath: "fixtures/localhost.pvk",
 		certPath: "fixtures/localhost.pem",
 	},
 });
 
-beforeEach(async () => {
-	await secureServer.start();
-	await secureServer.forGet("/foobar")
-		.withProtocol("https")
-		.thenReply(200, "__RESPONSE_DATA__");
-});
-afterEach(() => secureServer.stop());
+const plainProxy = setupSocksServer();
 
-function setupSocksTarget(dest: Mockttp | Error) {
-	createConnectionChain.mockImplementation((_, callback: any) => {
-		if (dest instanceof Error) {
-			return callback(dest);
-		}
-		const socket = new Socket();
-		socket.connect(dest.port);
-		callback(null, { socket });
-	});
-}
+const secureProxy = setupSocksServer({
+	authenticate(username: string, password: string) {
+		return username === "foo" && password === "bar"
+			? Promise.resolve()
+			: Promise.reject(new Error("Authenticate failed"));
+	},
+});
 
 it("should connect target through socks", async () => {
-	setupSocksTarget(httpServer);
 	const dispatcher = socksDispatcher({
 		proxy: {
 			type: 5,
-			host: "::1",
-			port: 1080,
+			host: plainProxy.address,
+			port: plainProxy.port,
 		},
 	});
-	await fetch("http://example.com/foobar", { dispatcher });
+	const ep = await httpServer.forGet("/foobar")
+		.thenReply(200, "__RESPONSE_DATA__");
 
-	expect(createConnectionChain.mock.calls).toHaveLength(1);
+	const res = await fetch(httpServer.urlFor("/foobar"), { dispatcher });
 
-	const [options] = createConnectionChain.mock.calls[0];
-	expect(options).toStrictEqual({
-		proxies: [{ host: "::1", port: 1080, type: 5 }],
-		command: "connect",
-		destination: { host: "example.com", port: 80 },
-	});
+	await expect(res.text()).resolves.toBe("__RESPONSE_DATA__");
+
+	const [inbound] = await ep.getSeenRequests();
+	expect(inbound.remotePort).toBe(plainProxy.getLastSocket().localPort);
 });
 
-it("should pass parameters to socks proxy", async () => {
-	setupSocksTarget(secureServer);
+it("should support proxy chain", async () => {
 	const dispatcher = socksDispatcher({
-		proxy: {
-			type: 4,
-			host: "::1",
-			port: 1080,
-		},
-		connect: {
-			rejectUnauthorized: false,
-		},
+		proxy: [{
+			type: 5,
+			host: secureProxy.address,
+			port: secureProxy.port,
+			userId: "foo",
+			password: "bar",
+		}, {
+			type: 5,
+			host: plainProxy.address,
+			port: plainProxy.port,
+		}],
 	});
+	const ep = await httpServer.forGet("/foobar")
+		.thenReply(200, "__RESPONSE_DATA__");
 
-	await fetch("https://example.com/foobar", { dispatcher });
+	const res = await fetch(httpServer.urlFor("/foobar"), { dispatcher });
 
-	const [options] = createConnectionChain.mock.calls[0];
-	expect(options).toStrictEqual({
-		proxies: [{ host: "::1", port: 1080, type: 4 }],
-		command: "connect",
-		destination: { host: "example.com", port: 443 },
-	});
+	await expect(res.text()).resolves.toBe("__RESPONSE_DATA__");
+
+	const [inbound] = await ep.getSeenRequests();
+	expect(inbound.remotePort).toBe(plainProxy.getLastSocket().localPort);
 });
 
 it("should support TLS over socks", async () => {
-	setupSocksTarget(secureServer);
 	const dispatcher = socksDispatcher({
 		proxy: {
 			type: 5,
-			host: "::1",
-			port: 1080,
+			host: plainProxy.address,
+			port: plainProxy.port,
 		},
 		connect: {
 			rejectUnauthorized: false,
 		},
 	});
 
-	const res = await fetch("https://example.com/foobar", { dispatcher });
-	await expect(res.text()).resolves.toBe("__RESPONSE_DATA__");
+	const ep = await secureServer.forGet("/foobar")
+		.thenReply(200, "__TLS_RESPONSE_DATA__");
+
+	const res = await fetch(secureServer.urlFor("/foobar"), { dispatcher });
+	await expect(res.text()).resolves.toBe("__TLS_RESPONSE_DATA__");
+
+	const [inbound] = await ep.getSeenRequests();
+	expect(inbound.remotePort).toBe(plainProxy.getLastSocket().localPort);
 });
