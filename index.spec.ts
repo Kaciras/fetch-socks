@@ -13,19 +13,26 @@ function setupHttpServer(options?: MockttpOptions) {
 }
 
 function setupSocksServer(options: any = {}) {
-	let laseSocket: net.Socket;
+	let inbound: net.Socket;
+	let outbound: net.Socket;
 
 	options.connect = async (port: number, host: string) => {
-		laseSocket = net.connect(port, host);
-		await waitForConnect(laseSocket);
-		return laseSocket;
+		outbound = net.connect(port, host);
+		await waitForConnect(outbound);
+		return outbound;
 	};
+	options.filter = (port: number, host: string, socket: net.Socket) => {
+		inbound = socket;
+		return Promise.resolve();
+	};
+
 	const server = createProxyServer(options);
 	server.listen();
 	afterAll(() => void server.close());
 
 	return {
-		getLastSocket: () => laseSocket,
+		get inbound() { return inbound; },
+		get outbound() { return outbound; },
 		...server.address() as net.AddressInfo,
 	};
 }
@@ -49,6 +56,48 @@ const secureProxy = setupSocksServer({
 	},
 });
 
+it("should throw error if the socks server is unreachable", async () => {
+	const dispatcher = socksDispatcher({
+		proxy: {
+			type: 5,
+			host: "::1",
+			port: 111,
+		},
+	});
+	await httpServer.forGet("/foobar").thenReply(200, "__RESPONSE_DATA__");
+
+	const promise = fetch(httpServer.urlFor("/foobar"), { dispatcher });
+
+	await expect(promise).rejects.toThrow(new TypeError("fetch failed"));
+});
+
+it("should throw error if the target is unreachable", async () => {
+	const dispatcher = socksDispatcher({
+		proxy: {
+			type: 5,
+			host: secureProxy.address,
+			port: secureProxy.port,
+			userId: "foo",
+			password: "_INVALID_",
+		},
+	});
+	await httpServer.forGet("/foobar").thenReply(200, "__RESPONSE_DATA__");
+	const promise = fetch(httpServer.urlFor("/foobar"), { dispatcher });
+	await expect(promise).rejects.toThrow(new TypeError("fetch failed"));
+});
+
+it("should throw error if authenticate failed", async () => {
+	const dispatcher = socksDispatcher({
+		proxy: {
+			type: 5,
+			host: plainProxy.address,
+			port: plainProxy.port,
+		},
+	});
+	const promise = fetch("http://[::1]:111", { dispatcher });
+	await expect(promise).rejects.toThrow(new TypeError("fetch failed"));
+});
+
 it("should connect target through socks", async () => {
 	const dispatcher = socksDispatcher({
 		proxy: {
@@ -65,7 +114,7 @@ it("should connect target through socks", async () => {
 	await expect(res.text()).resolves.toBe("__RESPONSE_DATA__");
 
 	const [inbound] = await ep.getSeenRequests();
-	expect(inbound.remotePort).toBe(plainProxy.getLastSocket().localPort);
+	expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
 });
 
 it("should support proxy chain", async () => {
@@ -90,7 +139,9 @@ it("should support proxy chain", async () => {
 	await expect(res.text()).resolves.toBe("__RESPONSE_DATA__");
 
 	const [inbound] = await ep.getSeenRequests();
-	expect(inbound.remotePort).toBe(plainProxy.getLastSocket().localPort);
+	expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
+
+	expect(plainProxy.inbound.remotePort).toBe(secureProxy.outbound.localPort);
 });
 
 it("should support TLS over socks", async () => {
@@ -112,5 +163,5 @@ it("should support TLS over socks", async () => {
 	await expect(res.text()).resolves.toBe("__TLS_RESPONSE_DATA__");
 
 	const [inbound] = await ep.getSeenRequests();
-	expect(inbound.remotePort).toBe(plainProxy.getLastSocket().localPort);
+	expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
 });
