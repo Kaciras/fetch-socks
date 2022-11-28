@@ -2,28 +2,25 @@ import * as tls from "tls";
 import { SocksClient, SocksProxy } from "socks";
 import { buildConnector, Agent } from "undici";
 
+type onEstablished = Parameters<typeof SocksClient.createConnection>[1];
+
 function resolvePort(protocol: string, port: string) {
 	return port ? Number.parseInt(port) : protocol === "http:" ? 80 : 443;
 }
 
-export function socksConnector(
-	socks: SocksProxy | SocksProxy[],
-	tlsOptions?: any,
-): buildConnector.connector {
-	const proxies = Array.isArray(socks) ? socks : [socks];
-
+export function socksConnector(proxies: SocksProxy | SocksProxy[], tlsOptions?: any): buildConnector.connector {
 	return async (options, callback) => {
 		const { protocol, hostname, port } = options;
 
-		// noinspection ES6MissingAwait
-		SocksClient.createConnectionChain({
-			proxies,
-			command: "connect",
+		const socksOptions = {
+			command: "connect" as const,
 			destination: {
 				host: hostname,
 				port: resolvePort(protocol, port as any),
 			},
-		}, (error, connection) => {
+		};
+
+		const onEstablished: onEstablished = (error, connection) => {
 			if (error) {
 				return callback(error, null);
 			}
@@ -42,7 +39,15 @@ export function socksConnector(
 			socket
 				.on("error", error => callback(error, null))
 				.on(connectEvent, () => callback(null, socket));
-		});
+		};
+
+		if (Array.isArray(proxies)) {
+			// noinspection ES6MissingAwait
+			SocksClient.createConnectionChain({ proxies, ...socksOptions }, onEstablished);
+		} else {
+			// noinspection ES6MissingAwait
+			SocksClient.createConnection({ proxy: proxies, ...socksOptions }, onEstablished);
+		}
 	};
 }
 
