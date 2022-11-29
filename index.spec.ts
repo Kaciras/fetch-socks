@@ -12,21 +12,27 @@ function setupHttpServer(options?: MockttpOptions) {
 	return server;
 }
 
-function setupSocksServer(options: any = {}) {
+type AuthFn = NonNullable<Parameters<typeof createProxyServer>[0]>["authenticate"];
+
+function setupSocksServer(authenticate?: AuthFn) {
 	let inbound: net.Socket;
 	let outbound: net.Socket;
 
-	options.connect = async (port: number, host: string) => {
-		outbound = net.connect(port, host);
-		await waitForConnect(outbound);
-		return outbound;
-	};
-	options.filter = (port: number, host: string, socket: net.Socket) => {
-		inbound = socket;
-		return Promise.resolve();
-	};
+	const server = createProxyServer({
+		authenticate,
 
-	const server = createProxyServer(options);
+		async connect(port: number, host: string) {
+			outbound = net.connect(port, host);
+			await waitForConnect(outbound);
+			return outbound;
+		},
+
+		filter(port: number, host: string, socket: net.Socket) {
+			inbound = socket;
+			return Promise.resolve();
+		},
+	});
+
 	server.listen();
 	afterAll(() => void server.close());
 
@@ -48,12 +54,31 @@ const secureServer = setupHttpServer({
 
 const plainProxy = setupSocksServer();
 
-const secureProxy = setupSocksServer({
-	authenticate(username: string, password: string) {
-		return username === "foo" && password === "bar"
-			? Promise.resolve()
-			: Promise.reject(new Error("Authenticate failed"));
-	},
+const secureProxy = setupSocksServer((username, password) => {
+	return username === "foo" && password === "bar"
+		? Promise.resolve()
+		: Promise.reject(new Error("Authenticate failed"));
+});
+
+it("should throw error if proxy connect timeout", async () => {
+	const blackHole = net.createServer();
+	blackHole.listen();
+	const addr = blackHole.address() as net.AddressInfo;
+
+	const dispatcher = socksDispatcher({
+		proxy: {
+			type: 5,
+			host: addr.address,
+			port: addr.port,
+		},
+		connect: {
+			timeout: 500,
+		},
+	});
+	const promise = fetch("https://example.com", { dispatcher });
+	await expect(promise).rejects.toThrow(new TypeError("fetch failed"));
+
+	blackHole.close();
 });
 
 it("should throw error if the socks server is unreachable", async () => {

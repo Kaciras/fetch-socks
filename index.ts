@@ -1,5 +1,6 @@
 import { SocksClient, SocksProxy } from "socks";
 import { Agent, buildConnector } from "undici";
+import Connector = buildConnector.connector;
 
 type onEstablished = Parameters<typeof SocksClient.createConnection>[1];
 
@@ -7,14 +8,16 @@ function resolvePort(protocol: string, port: string) {
 	return port ? Number.parseInt(port) : protocol === "http:" ? 80 : 443;
 }
 
-export function socksConnector(proxies: SocksProxy | SocksProxy[], tlsOptions?: any): buildConnector.connector {
-	const tlsUpgrade = buildConnector(tlsOptions ?? {});
+export function socksConnector(proxies: SocksProxy | SocksProxy[], buildOpts: any = {}): Connector {
+	const { timeout = 10e3 } = buildOpts;
+	const tlsUpgrade = buildConnector(buildOpts);
 
 	return async (options, callback) => {
 		const { protocol, hostname, port } = options;
 
 		const socksOptions = {
 			command: "connect" as const,
+			timeout,
 			destination: {
 				host: hostname,
 				port: resolvePort(protocol, port as any),
