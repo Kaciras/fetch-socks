@@ -1,6 +1,6 @@
 {
 	"name": "fetch-socks",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Socks proxy for Node builtin `fetch`",
 	"license": "MIT",
 	"repository": {
