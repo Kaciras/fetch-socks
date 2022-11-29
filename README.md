@@ -17,14 +17,14 @@ fetch `http://example.com` through `socks5://[::1]:1080`.
 import { socksDispatcher } from "fetch-socks";
 
 const dispatcher = socksDispatcher({
-	proxy: {
-		type: 5,
-		host: "::1",
-		port: 1080,
-	},
+    proxy: {
+        type: 5,
+        host: "::1",
+        port: 1080,
+    },
 });
 
-const response = await fetch("http://example.com", { dispatcher });
+const response = await fetch("https://example.com", { dispatcher });
 console.log(response.status);
 console.log(await response.text());
 ```
@@ -35,21 +35,22 @@ fetch through proxy chain with two SOCKS proxies.
 import { socksDispatcher } from "fetch-socks";
 
 const dispatcher = socksDispatcher({
-	proxy: [
-		{
-			type: 5,
-			host: "::1",
-			port: 1080,
-		},
-		{
-			type: 5,
-			host: "::1",
-			port: 1081,
-			//userId: "foo",
-			//password: "bar",
-		},
-    ],
+    proxy: [{
+		type: 5,
+        host: "::1",
+        port: 1080,
+    }, {
+		type: 5,
+        host: "::1",
+        port: 1081,
+        //userId: "foo",
+        //password: "bar",
+	}],
+    // set some TLS options
+    connect: {
+        rejectUnauthorized: false,
+    },
 });
 
-const response = await fetch("http://example.com", { dispatcher });
+const response = await fetch("https://example.com", { dispatcher });
 ```
