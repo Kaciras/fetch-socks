@@ -46,7 +46,7 @@ const dispatcher = socksDispatcher({
         port: 1081,
         //userId: "foo",
         //password: "bar",
-	}],
+    }],
     // set some TLS options
     connect: {
         rejectUnauthorized: false,

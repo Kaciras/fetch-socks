@@ -5,6 +5,8 @@ import TLSOptions = buildConnector.BuildOptions;
 
 type onEstablished = Parameters<typeof SocksClient.createConnection>[1];
 
+type Proxies = SocksProxy | SocksProxy[];
+
 /**
  * Since socks does not guess HTTP ports, we need to do that.
  *
@@ -21,7 +23,7 @@ function resolvePort(protocol: string, port: string) {
  * @param proxies The proxy server to use or the list of proxy servers to chain.
  * @param tlsOpts TLS upgrade options.
  */
-export function socksConnector(proxies: SocksProxy | SocksProxy[], tlsOpts: TLSOptions = {}): Connector {
+export function socksConnector(proxies: Proxies, tlsOpts: TLSOptions = {}): Connector {
 	const { timeout = 10e3 } = tlsOpts;
 	const tlsUpgrade = buildConnector(tlsOpts);
 
@@ -64,7 +66,7 @@ export interface SocksDispatcherOptions extends Agent.Options {
 	/**
 	 * The socks proxy server to use or the list of proxy servers to chain.
 	 */
-	proxy: SocksProxy | SocksProxy[];
+	proxy: Proxies;
 
 	/**
 	 * TLS upgrade options, see:
