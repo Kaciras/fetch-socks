@@ -5,7 +5,7 @@ import TLSOptions = buildConnector.BuildOptions;
 
 type onEstablished = Parameters<typeof SocksClient.createConnection>[1];
 
-type Proxies = SocksProxy | SocksProxy[];
+export type SocksProxies = SocksProxy | SocksProxy[];
 
 /**
  * Since socks does not guess HTTP ports, we need to do that.
@@ -23,7 +23,7 @@ function resolvePort(protocol: string, port: string) {
  * @param proxies The proxy server to use or the list of proxy servers to chain.
  * @param tlsOpts TLS upgrade options.
  */
-export function socksConnector(proxies: Proxies, tlsOpts: TLSOptions = {}): Connector {
+export function socksConnector(proxies: SocksProxies, tlsOpts: TLSOptions = {}): Connector {
 	const { timeout = 10e3 } = tlsOpts;
 	const tlsUpgrade = buildConnector(tlsOpts);
 
@@ -64,11 +64,6 @@ export function socksConnector(proxies: Proxies, tlsOpts: TLSOptions = {}): Conn
 export interface SocksDispatcherOptions extends Agent.Options {
 
 	/**
-	 * The socks proxy server to use or the list of proxy servers to chain.
-	 */
-	proxy: Proxies;
-
-	/**
 	 * TLS upgrade options, see:
 	 * https://undici.nodejs.org/#/docs/api/Client?id=parameter-connectoptions
 	 *
@@ -80,8 +75,11 @@ export interface SocksDispatcherOptions extends Agent.Options {
 
 /**
  * Create a undici Agent with socks connector.
+ *
+ * @param proxies The proxy server to use or the list of proxy servers to chain.
+ * @param options Additional options passed to the Agent constructor.
  */
-export function socksDispatcher(options: SocksDispatcherOptions) {
-	const { connect, proxy, ...rest } = options;
-	return new Agent({ ...rest, connect: socksConnector(proxy, connect) });
+export function socksDispatcher(proxies: SocksProxies, options: SocksDispatcherOptions = {}) {
+	const { connect, ...rest } = options;
+	return new Agent({ ...rest, connect: socksConnector(proxies, connect) });
 }

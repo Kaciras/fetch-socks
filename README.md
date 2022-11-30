@@ -10,7 +10,7 @@ Socks proxy for Node builtin (also [undici](https://github.com/nodejs/undici)) `
 npm install fetch-socks
 ```
 
-# Usage Example
+# Usage Examples
 
 fetch `http://example.com` through `socks5://[::1]:1080`.
 
@@ -18,11 +18,9 @@ fetch `http://example.com` through `socks5://[::1]:1080`.
 import { socksDispatcher } from "fetch-socks";
 
 const dispatcher = socksDispatcher({
-    proxy: {
-        type: 5,
-        host: "::1",
-        port: 1080,
-    },
+    type: 5,
+    host: "::1",
+    port: 1080,
 });
 
 const response = await fetch("https://example.com", { dispatcher });
@@ -30,25 +28,27 @@ console.log(response.status);
 console.log(await response.text());
 ```
 
-fetch through proxy chain with two SOCKS proxies.
+TypeScript example, fetch through proxy chain with two SOCKS proxies.
 
-```javascript
-import { socksDispatcher } from "fetch-socks";
+```typescript
+import { fetch } from "undici";
+import { socksDispatcher, SocksProxies } from "fetch-socks";
 
-const dispatcher = socksDispatcher({
-    proxy: [{
-        type: 5,
-        host: "::1",
-        port: 1080,
-    }, {
-        type: 5,
-        host: "::1",
-        port: 1081,
-        //userId: "foo",
-        //password: "bar",
-    }],
-    // set some TLS options
+const proxyConfig: SocksProxies = [{
+    type: 5,
+    host: "::1",
+    port: 1080,
+}, {
+    type: 5,
+    host: "127.0.0.1",
+    port: 1081,
+    //userId: "foo",
+    //password: "bar",
+}];
+
+const dispatcher = socksDispatcher(proxyConfig, {
     connect: {
+        // set some TLS options
         rejectUnauthorized: false,
     },
 });

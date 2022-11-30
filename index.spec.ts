@@ -66,14 +66,11 @@ it("should throw error if proxy connect timeout", async () => {
 	const addr = blackHole.address() as net.AddressInfo;
 
 	const dispatcher = socksDispatcher({
-		proxy: {
-			type: 5,
-			host: addr.address,
-			port: addr.port,
-		},
-		connect: {
-			timeout: 500,
-		},
+		type: 5,
+		host: addr.address,
+		port: addr.port,
+	}, {
+		connect: { timeout: 500 },
 	});
 	const promise = fetch("https://example.com", { dispatcher });
 	await expect(promise).rejects.toThrow(new TypeError("fetch failed"));
@@ -83,11 +80,9 @@ it("should throw error if proxy connect timeout", async () => {
 
 it("should throw error if the socks server is unreachable", async () => {
 	const dispatcher = socksDispatcher({
-		proxy: {
-			type: 5,
-			host: "::1",
-			port: 111,
-		},
+		type: 5,
+		host: "::1",
+		port: 111,
 	});
 	await httpServer.forGet("/foobar").thenReply(200, "__RESPONSE_DATA__");
 
@@ -98,13 +93,11 @@ it("should throw error if the socks server is unreachable", async () => {
 
 it("should throw error if the target is unreachable", async () => {
 	const dispatcher = socksDispatcher({
-		proxy: {
-			type: 5,
-			host: secureProxy.address,
-			port: secureProxy.port,
-			userId: "foo",
-			password: "_INVALID_",
-		},
+		type: 5,
+		host: secureProxy.address,
+		port: secureProxy.port,
+		userId: "foo",
+		password: "_INVALID_",
 	});
 	await httpServer.forGet("/foobar").thenReply(200, "__RESPONSE_DATA__");
 	const promise = fetch(httpServer.urlFor("/foobar"), { dispatcher });
@@ -113,11 +106,9 @@ it("should throw error if the target is unreachable", async () => {
 
 it("should throw error if authenticate failed", async () => {
 	const dispatcher = socksDispatcher({
-		proxy: {
-			type: 5,
-			host: plainProxy.address,
-			port: plainProxy.port,
-		},
+		type: 5,
+		host: plainProxy.address,
+		port: plainProxy.port,
 	});
 	const promise = fetch("http://[::1]:111", { dispatcher });
 	await expect(promise).rejects.toThrow(new TypeError("fetch failed"));
@@ -125,11 +116,9 @@ it("should throw error if authenticate failed", async () => {
 
 it("should connect target through socks", async () => {
 	const dispatcher = socksDispatcher({
-		proxy: {
-			type: 5,
-			host: plainProxy.address,
-			port: plainProxy.port,
-		},
+		type: 5,
+		host: plainProxy.address,
+		port: plainProxy.port,
 	});
 	const ep = await httpServer.forGet("/foobar")
 		.thenReply(200, "__RESPONSE_DATA__");
@@ -143,19 +132,17 @@ it("should connect target through socks", async () => {
 });
 
 it("should support proxy chain", async () => {
-	const dispatcher = socksDispatcher({
-		proxy: [{
-			type: 5,
-			host: secureProxy.address,
-			port: secureProxy.port,
-			userId: "foo",
-			password: "bar",
-		}, {
-			type: 5,
-			host: plainProxy.address,
-			port: plainProxy.port,
-		}],
-	});
+	const dispatcher = socksDispatcher([{
+		type: 5,
+		host: secureProxy.address,
+		port: secureProxy.port,
+		userId: "foo",
+		password: "bar",
+	}, {
+		type: 5,
+		host: plainProxy.address,
+		port: plainProxy.port,
+	}]);
 	const ep = await httpServer.forGet("/foobar")
 		.thenReply(200, "__RESPONSE_DATA__");
 
@@ -171,11 +158,10 @@ it("should support proxy chain", async () => {
 
 it("should support TLS over socks", async () => {
 	const dispatcher = socksDispatcher({
-		proxy: {
-			type: 5,
-			host: plainProxy.address,
-			port: plainProxy.port,
-		},
+		type: 5,
+		host: plainProxy.address,
+		port: plainProxy.port,
+	}, {
 		connect: {
 			rejectUnauthorized: false,
 		},
