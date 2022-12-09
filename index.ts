@@ -35,7 +35,7 @@ export function socksConnector(proxies: SocksProxies, tlsOpts: TLSOptions = {}):
 			timeout,
 			destination: {
 				host: hostname,
-				port: resolvePort(protocol, port as any),
+				port: resolvePort(protocol, port),
 			},
 		};
 
@@ -48,7 +48,7 @@ export function socksConnector(proxies: SocksProxies, tlsOpts: TLSOptions = {}):
 			if (protocol !== "https:") {
 				return callback(null, socket.setNoDelay());
 			}
-			return tlsUpgrade({ ...options, httpSocket: socket } as any, callback);
+			return tlsUpgrade({ ...options, httpSocket: socket }, callback);
 		};
 
 		if (Array.isArray(proxies)) {
