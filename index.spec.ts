@@ -2,8 +2,8 @@ import * as net from "net";
 import { afterAll, afterEach, beforeEach, expect, it } from "@jest/globals";
 import { createProxyServer, waitForConnect } from "@e9x/simple-socks";
 import { getLocal, MockttpOptions } from "mockttp";
-import { fetch } from "undici";
-import { socksDispatcher } from "./index";
+import { Agent, fetch } from "undici";
+import { socksConnector, socksDispatcher } from "./index";
 
 function setupHttpServer(options?: MockttpOptions) {
 	const server = getLocal(options);
@@ -58,6 +58,10 @@ const secureProxy = setupSocksServer((username, password) => {
 	return username === "foo" && password === "bar"
 		? Promise.resolve()
 		: Promise.reject(new Error("Authenticate failed"));
+});
+
+it("should check at latest one proxy is provided", () => {
+	expect(() => socksDispatcher([])).toThrow("At least one socks proxy must be provided");
 });
 
 it("should throw error if proxy connect timeout", async () => {
@@ -176,3 +180,28 @@ it("should support TLS over socks", async () => {
 	const [inbound] = await ep.getSeenRequests();
 	expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
 });
+
+it("should do handshake on existing socket", async () => {
+	const socksConnect = socksConnector({
+		type: 5,
+		host: plainProxy.address,
+		port: plainProxy.port,
+	});
+
+	function connect(options: any, callback: any) {
+		const socket = net.connect(plainProxy.port, plainProxy.address);
+		socksConnect({ ...options, httpSocket: socket }, callback);
+	}
+
+	const dispatcher = new Agent({ connect });
+
+	const ep = await httpServer.forGet("/foobar")
+		.thenReply(200, "__RESPONSE_DATA__");
+
+	const res = await fetch(httpServer.urlFor("/foobar"), { dispatcher });
+
+	await expect(res.text()).resolves.toBe("__RESPONSE_DATA__");
+
+	const [inbound] = await ep.getSeenRequests();
+	expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
+}); 

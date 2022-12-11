@@ -9,5 +9,9 @@ module.exports = {
 	},
 	rules: {
 		"@kaciras/import-group-sort": "warn",
+		"prefer-const": ["error", {
+			"destructuring": "all",
+			"ignoreReadBeforeAssign": false
+		}]
 	},
 };

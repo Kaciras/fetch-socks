@@ -23,7 +23,7 @@ const dispatcher = socksDispatcher({
     port: 1080,
 });
 
-const response = await fetch("https://example.com", { dispatcher });
+const response = await fetch("http://example.com", { dispatcher });
 console.log(response.status);
 console.log(await response.text());
 ```
@@ -53,5 +53,33 @@ const dispatcher = socksDispatcher(proxyConfig, {
     },
 });
 
+const response = await fetch("https://example.com", { dispatcher });
+```
+
+create a socks connection over HTTP tunnel with `socksConnector`.
+
+```javascript
+import { Client, Agent } from "undici";
+import { socksConnector } from "fetch-socks";
+
+const socksConnect = socksConnector({
+	type: 5,
+	host: "::1",
+	port: 1080,
+});
+
+async function connect(options, callback) {
+	const client = new Client("http://localhost:80");
+	const { socket, statusCode } = await client.connect({
+		path: "[::1]:1080",
+	});
+	if (statusCode !== 200) {
+		callback(new Error("Proxy response !== 200 when HTTP Tunneling"));
+	} else {
+		socksConnect({ ...options, httpSocket: socket }, callback);
+	}
+}
+
+const dispatcher = new Agent({ connect });
 const response = await fetch("https://example.com", { dispatcher });
 ```

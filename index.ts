@@ -3,8 +3,6 @@ import { Agent, buildConnector } from "undici";
 import Connector = buildConnector.connector;
 import TLSOptions = buildConnector.BuildOptions;
 
-type onEstablished = Parameters<typeof SocksClient.createConnection>[1];
-
 export type SocksProxies = SocksProxy | SocksProxy[];
 
 /**
@@ -24,40 +22,49 @@ function resolvePort(protocol: string, port: string) {
  * @param tlsOpts TLS upgrade options.
  */
 export function socksConnector(proxies: SocksProxies, tlsOpts: TLSOptions = {}): Connector {
+	const chain = Array.isArray(proxies) ? proxies : [proxies];
 	const { timeout = 10e3 } = tlsOpts;
 	const tlsUpgrade = buildConnector(tlsOpts);
 
-	return async (options, callback) => {
-		const { protocol, hostname, port } = options;
+	if (chain.length === 0) {
+		throw new Error("At least one socks proxy must be provided");
+	}
 
-		const socksOptions = {
-			command: "connect" as const,
-			timeout,
-			destination: {
+	return async (options, callback) => {
+		let { protocol, hostname, port, httpSocket } = options;
+
+		for (let i = 0; i < chain.length; i++) {
+			const next = chain[i + 1];
+
+			const destination = i === chain.length - 1 ? {
 				host: hostname,
 				port: resolvePort(protocol, port),
-			},
-		};
+			} : {
+				port: next.port,
+				host: next.host ?? next.ipaddress,
+			};
 
-		const onEstablished: onEstablished = (error, connection) => {
-			if (error) {
+			const socksOpts = {
+				command: "connect" as const,
+				proxy: chain[i],
+				timeout,
+				destination,
+				existing_socket: httpSocket,
+			};
+
+			try {
+				const r = await SocksClient.createConnection(socksOpts);
+				httpSocket = r.socket;
+			} catch (error) {
 				return callback(error, null);
 			}
-			const { socket } = connection!;
-
-			if (protocol !== "https:") {
-				return callback(null, socket.setNoDelay());
-			}
-			return tlsUpgrade({ ...options, httpSocket: socket }, callback);
-		};
-
-		if (Array.isArray(proxies)) {
-			// noinspection ES6MissingAwait
-			SocksClient.createConnectionChain({ proxies, ...socksOptions }, onEstablished);
-		} else {
-			// noinspection ES6MissingAwait
-			SocksClient.createConnection({ proxy: proxies, ...socksOptions }, onEstablished);
 		}
+
+		// httpSocket is not null because at least one proxy is connected.
+		if (protocol !== "https:") {
+			return callback(null, httpSocket!.setNoDelay());
+		}
+		return tlsUpgrade({ ...options, httpSocket }, callback);
 	};
 }
 
