@@ -18,17 +18,15 @@ function resolvePort(protocol: string, port: string) {
 /**
  * Create an undici connector which establish the connection through socks proxies.
  *
+ * If the proxies is an empty array, it will connect directly.
+ *
  * @param proxies The proxy server to use or the list of proxy servers to chain.
  * @param tlsOpts TLS upgrade options.
  */
 export function socksConnector(proxies: SocksProxies, tlsOpts: TLSOptions = {}): Connector {
 	const chain = Array.isArray(proxies) ? proxies : [proxies];
 	const { timeout = 10e3 } = tlsOpts;
-	const tlsUpgrade = buildConnector(tlsOpts);
-
-	if (chain.length === 0) {
-		throw new Error("At least one socks proxy must be provided");
-	}
+	const undiciConnect = buildConnector(tlsOpts);
 
 	return async (options, callback) => {
 		let { protocol, hostname, port, httpSocket } = options;
@@ -60,11 +58,16 @@ export function socksConnector(proxies: SocksProxies, tlsOpts: TLSOptions = {}):
 			}
 		}
 
-		// httpSocket is not null because at least one proxy is connected.
-		if (protocol !== "https:") {
-			return callback(null, httpSocket!.setNoDelay());
+		if (httpSocket && protocol !== "https:") {
+			return callback(null, httpSocket.setNoDelay());
 		}
-		return tlsUpgrade({ ...options, httpSocket }, callback);
+
+		/*
+		 * There are 2 cases here:
+		 * If httpSocket doesn't exist, let undici make a connection.
+		 * If httpSocket exists & protocol is HTTPS, do TLS upgrade.
+		 */
+		return undiciConnect({ ...options, httpSocket }, callback);
 	};
 }
 
@@ -82,6 +85,8 @@ export interface SocksDispatcherOptions extends Agent.Options {
 
 /**
  * Create a undici Agent with socks connector.
+ *
+ * If the proxies is an empty array, it will connect directly.
  *
  * @param proxies The proxy server to use or the list of proxy servers to chain.
  * @param options Additional options passed to the Agent constructor.

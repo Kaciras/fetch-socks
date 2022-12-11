@@ -60,10 +60,6 @@ const secureProxy = setupSocksServer((username, password) => {
 		: Promise.reject(new Error("Authenticate failed"));
 });
 
-it("should check at latest one proxy is provided", () => {
-	expect(() => socksDispatcher([])).toThrow("At least one socks proxy must be provided");
-});
-
 it("should throw error if proxy connect timeout", async () => {
 	const blackHole = net.createServer();
 	blackHole.listen();
@@ -116,6 +112,15 @@ it("should throw error if authenticate failed", async () => {
 	});
 	const promise = fetch("http://[::1]:111", { dispatcher });
 	await expect(promise).rejects.toThrow(new TypeError("fetch failed"));
+});
+
+it("should connect directly if no proxies are provided", async () => {
+	const dispatcher = socksDispatcher([]);
+	await httpServer.forGet("/foobar").thenReply(200, "__RESPONSE_DATA__");
+
+	const res = await fetch(httpServer.urlFor("/foobar"), { dispatcher });
+
+	await expect(res.text()).resolves.toBe("__RESPONSE_DATA__");
 });
 
 it("should connect target through socks", async () => {
