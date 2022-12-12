@@ -58,6 +58,7 @@ export function socksConnector(proxies: SocksProxies, tlsOpts: TLSOptions = {}):
 			}
 		}
 
+		// httpSocket may not exist when the chain is empty.
 		if (httpSocket && protocol !== "https:") {
 			return callback(null, httpSocket.setNoDelay());
 		}
