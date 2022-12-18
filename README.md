@@ -21,6 +21,9 @@ const dispatcher = socksDispatcher({
     type: 5,
     host: "::1",
     port: 1080,
+
+	//userId: "username",
+	//password: "password",
 });
 
 const response = await fetch("http://example.com", { dispatcher });
@@ -42,8 +45,6 @@ const proxyConfig: SocksProxies = [{
     type: 5,
     host: "127.0.0.1",
     port: 1081,
-    //userId: "foo",
-    //password: "bar",
 }];
 
 const dispatcher = socksDispatcher(proxyConfig, {
