@@ -22,8 +22,8 @@ const dispatcher = socksDispatcher({
     host: "::1",
     port: 1080,
 
-	//userId: "username",
-	//password: "password",
+    //userId: "username",
+    //password: "password",
 });
 
 const response = await fetch("http://example.com", { dispatcher });
