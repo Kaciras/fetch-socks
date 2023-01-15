@@ -16,7 +16,7 @@ function resolvePort(protocol: string, port: string) {
 }
 
 /**
- * Create an undici connector which establish the connection through socks proxies.
+ * Create an Undici connector which establish the connection through socks proxies.
  *
  * If the proxies is an empty array, it will connect directly.
  *
@@ -65,7 +65,7 @@ export function socksConnector(proxies: SocksProxies, tlsOpts: TLSOptions = {}):
 
 		/*
 		 * There are 2 cases here:
-		 * If httpSocket doesn't exist, let undici make a connection.
+		 * If httpSocket doesn't exist, let Undici make a connection.
 		 * If httpSocket exists & protocol is HTTPS, do TLS upgrade.
 		 */
 		return undiciConnect({ ...options, httpSocket }, callback);
@@ -85,7 +85,7 @@ export interface SocksDispatcherOptions extends Agent.Options {
 }
 
 /**
- * Create a undici Agent with socks connector.
+ * Create a Undici Agent with socks connector.
  *
  * If the proxies is an empty array, it will connect directly.
  *

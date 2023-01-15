@@ -87,3 +87,33 @@ async function connect(options, callback) {
 const dispatcher = new Agent({ connect });
 const response = await fetch("https://example.com", { dispatcher });
 ```
+
+# API
+
+## `socksConnector(proxies, connectOptions?)`
+
+* `proxies` The proxy server to use or the list of proxy servers to chain. If you pass an empty array it will connect directly.
+* `connectOptions` (optional) The options used to perform directly connect or TLS upgrade, see [here](https://undici.nodejs.org/#/docs/api/Connector?id=parameter-buildconnectorbuildoptions)
+
+Create an [Undici connector](https://undici.nodejs.org/#/docs/api/Connector) which establish the connection through socks proxies.
+
+## `socksDispatcher(proxies, options?)`
+
+Create a Undici Agent with socks connector.
+
+* `proxies` Same as `socksConnector`'s.
+* `options` (optional) [Agent options](https://undici.nodejs.org/#/docs/api/Agent). The `connect` property will be used to create socks connector.
+
+```javascript
+import { socksConnector, socksDispatcher } from "fetch-socks";
+import { Agent } from "undici";
+
+const proxy = { type: 5, host: "::1", port: 1080 };
+const connect = { /* ... */ };
+const agentOptions = { /* ... */ };
+
+socksDispatcher(proxy, { ...agentOptions, connect });
+
+// Is equivalent to
+new Agent({ ...agentOptions, connect: socksConnector(proxy, connect) });
+```
