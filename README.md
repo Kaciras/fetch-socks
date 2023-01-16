@@ -12,7 +12,7 @@ npm install fetch-socks
 
 # Usage Examples
 
-fetch `http://example.com` through `socks5://[::1]:1080`.
+Fetch `http://example.com` through `socks5://[::1]:1080`.
 
 ```javascript
 import { socksDispatcher } from "fetch-socks";
@@ -30,6 +30,16 @@ const response = await fetch("http://example.com", { dispatcher });
 console.log(response.status);
 console.log(await response.text());
 ```
+
+Set the proxy globally.
+
+```javascript
+import { socksDispatcher } from "fetch-socks";
+
+const dispatcher = socksDispatcher({ /* ... */});
+
+global[Symbol.for("undici.globalDispatcher.1")] = dispatcher;
+````
 
 TypeScript example, fetch through proxy chain with two SOCKS proxies.
 
@@ -92,10 +102,10 @@ const response = await fetch("https://example.com", { dispatcher });
 
 ## `socksConnector(proxies, connectOptions?)`
 
+Create an [Undici connector](https://undici.nodejs.org/#/docs/api/Connector) which establish the connection through socks proxies.
+
 * `proxies` The proxy server to use or the list of proxy servers to chain. If you pass an empty array it will connect directly.
 * `connectOptions` (optional) The options used to perform directly connect or TLS upgrade, see [here](https://undici.nodejs.org/#/docs/api/Connector?id=parameter-buildconnectorbuildoptions)
-
-Create an [Undici connector](https://undici.nodejs.org/#/docs/api/Connector) which establish the connection through socks proxies.
 
 ## `socksDispatcher(proxies, options?)`
 
