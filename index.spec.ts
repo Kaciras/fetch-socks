@@ -1,9 +1,13 @@
 import * as net from "net";
 import { afterAll, afterEach, beforeEach, expect, it } from "@jest/globals";
+import { WebSocketServer } from "ws";
 import { createProxyServer, waitForConnect } from "@e9x/simple-socks";
 import { getLocal, Mockttp, MockttpOptions } from "mockttp";
-import { Agent, Dispatcher, fetch } from "undici";
+import { Agent, Dispatcher, fetch, WebSocket } from "undici";
+import { MessageEvent } from "undici/types/websocket";
 import { socksConnector, socksDispatcher } from "./index";
+
+const kGlobalDispatcher = Symbol.for("undici.globalDispatcher.1");
 
 function setupHttpServer(options?: MockttpOptions) {
 	const server = getLocal(options);
@@ -43,7 +47,27 @@ function setupSocksServer(authenticate?: AuthFn) {
 	};
 }
 
+function setupWSServer() {
+	const server = new WebSocketServer({ port: 0 });
+	let inbound: net.Socket;
+
+	server.on("connection", (ws, request) => {
+		inbound = request.socket;
+		ws.on("message", (m, isBinary) => {
+			ws.send(m, { binary: isBinary });
+		});
+	});
+
+	afterAll(() => void server.close());
+
+	return {
+		get inbound() { return inbound; },
+		...server.address() as net.AddressInfo,
+	};
+}
+
 const httpServer = setupHttpServer();
+const wsServer = setupWSServer();
 
 const secureServer = setupHttpServer({
 	https: {
@@ -200,4 +224,40 @@ it("should do handshake on existing socket", async () => {
 
 	const inbound = await verifyFetchSuccess(httpServer, dispatcher);
 	expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
-}); 
+});
+
+it("should set the proxy globally", async () => {
+	const dispatcher = socksDispatcher({
+		type: 5,
+		host: plainProxy.address,
+		port: plainProxy.port,
+	});
+
+	(global as any)[kGlobalDispatcher] = dispatcher;
+	try {
+		const inbound = await verifyFetchSuccess(httpServer, dispatcher);
+		expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
+	} finally {
+		delete (global as any)[kGlobalDispatcher];
+	}
+});
+
+it("should proxy WebSocket", async () => {
+	(global as any)[kGlobalDispatcher] = socksDispatcher({
+		type: 5,
+		host: plainProxy.address,
+		port: plainProxy.port,
+	});
+
+	const ws = new WebSocket(`ws://localhost:${wsServer.port}`);
+	try {
+		ws.addEventListener("open", () => ws.send("Hello"));
+		const res = await new Promise<MessageEvent>(resolve => ws.onmessage = resolve);
+
+		expect(res.data).toBe("Hello");
+		expect(wsServer.inbound.remotePort).toBe(plainProxy.outbound.localPort);
+	} finally {
+		ws.close();
+		delete (global as any)[kGlobalDispatcher];
+	}
+});
