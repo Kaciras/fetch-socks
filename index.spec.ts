@@ -110,19 +110,21 @@ async function verifyFetchSuccess(server: Mockttp, dispatcher: Dispatcher) {
 it("should throw error if proxy connect timeout", async () => {
 	const blackHole = net.createServer();
 	blackHole.listen();
-	const addr = blackHole.address() as net.AddressInfo;
+	try {
+		const addr = blackHole.address() as net.AddressInfo;
 
-	const dispatcher = socksDispatcher({
-		type: 5,
-		host: addr.address,
-		port: addr.port,
-	}, {
-		connect: { timeout: 500 },
-	});
+		const dispatcher = socksDispatcher({
+			type: 5,
+			host: addr.address,
+			port: addr.port,
+		}, {
+			connect: { timeout: 500 },
+		});
 
-	await verifyFetchFailed(httpServer, dispatcher, "Proxy connection timed out");
-
-	blackHole.close();
+		await verifyFetchFailed(httpServer, dispatcher, "Proxy connection timed out");
+	} finally {
+		blackHole.close();
+	}
 });
 
 it("should throw error if the argument is invalid", async () => {
