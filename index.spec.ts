@@ -94,7 +94,7 @@ async function verifyFetchFailed(server: Mockttp | string, dispatcher: Dispatche
 
 	await expect(promise).rejects.toThrow("fetch failed");
 	await expect(promise).rejects.toThrow(TypeError);
-	await expect(promise.catch(e => { throw e.cause; })).rejects.toThrow(cause);
+	await expect(promise.catch((e: Error) => { throw e.cause; })).rejects.toThrow(cause);
 }
 
 async function verifyFetchSuccess(server: Mockttp, dispatcher: Dispatcher) {
