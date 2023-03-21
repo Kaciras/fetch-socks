@@ -19,4 +19,6 @@ jobs:
 
       - run: pnpm test -- --coverage
 
+      - run: pnpm run type-coverage
+
       - uses: codecov/codecov-action@v3

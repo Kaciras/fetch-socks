@@ -20,10 +20,14 @@
 	],
 	"main": "index.js",
 	"types": "index.d.ts",
+	"typeCoverage": {
+		"ignoreCatch": true,
+		"atLeast": 100
+	},
 	"scripts": {
 		"lint": "eslint --fix .",
 		"test": "jest",
-		"type-coverage": "type-coverage --ignore-catch"
+		"type-coverage": "type-coverage"
 	},
 	"dependencies": {
 		"socks": "^2.7.1",
