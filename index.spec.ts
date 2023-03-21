@@ -218,12 +218,12 @@ it("should do handshake on existing socket", async () => {
 		port: plainProxy.port,
 	});
 
-	function connect(options: any, callback: any) {
-		const socket = net.connect(plainProxy.port, plainProxy.address);
-		socksConnect({ ...options, httpSocket: socket }, callback);
-	}
-
-	const dispatcher = new Agent({ connect });
+	const dispatcher = new Agent({
+		connect(options, callback) {
+			const socket = net.connect(plainProxy.port, plainProxy.address);
+			socksConnect({ ...options, httpSocket: socket }, callback);
+		},
+	});
 
 	const inbound = await verifyFetchSuccess(httpServer, dispatcher);
 	expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
@@ -255,7 +255,7 @@ it("should proxy WebSocket", async () => {
 	const ws = new WebSocket(`ws://localhost:${wsServer.port}`);
 	try {
 		ws.addEventListener("open", () => ws.send("Hello"));
-		const res = await new Promise<MessageEvent>(resolve => ws.onmessage = resolve);
+		const res = await new Promise<MessageEvent<string>>(resolve => ws.onmessage = resolve);
 
 		expect(res.data).toBe("Hello");
 		expect(wsServer.inbound.remotePort).toBe(plainProxy.outbound.localPort);

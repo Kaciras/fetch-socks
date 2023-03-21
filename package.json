@@ -22,7 +22,8 @@
 	"types": "index.d.ts",
 	"scripts": {
 		"lint": "eslint --fix .",
-		"test": "jest"
+		"test": "jest",
+		"type-coverage": "type-coverage --ignore-catch"
 	},
 	"dependencies": {
 		"socks": "^2.7.1",
@@ -38,6 +39,7 @@
 		"jest": "^29.5.0",
 		"mockttp": "^3.7.0",
 		"ts-jest": "^29.0.5",
+		"type-coverage": "^2.25.0",
 		"typescript": "^5.0.2",
 		"ws": "^8.13.0"
 	}

@@ -11,6 +11,7 @@ specifiers:
   mockttp: ^3.7.0
   socks: ^2.7.1
   ts-jest: ^29.0.5
+  type-coverage: ^2.25.0
   typescript: ^5.0.2
   undici: ^5.21.0
   ws: ^8.13.0
@@ -29,6 +30,7 @@ devDependencies:
   jest: 29.5.0
   mockttp: 3.7.0
   ts-jest: 29.0.5_44ttdtjaknnkcgzh5px4h2qxl4
+  type-coverage: 2.25.0_typescript@5.0.2
   typescript: 5.0.2
   ws: 8.13.0
 
@@ -4088,6 +4090,29 @@ packages:
     engines: {node: '>= 0.8.0'}
     dependencies:
       prelude-ls: 1.2.1
+    dev: true
+
+  /type-coverage-core/2.25.0_typescript@5.0.2:
+    resolution: {integrity: sha512-+ROv68mmveRCpYKq4kLEPDerCqj2YGzR8tSPXH2LLMxY5xk3zJM23Ztv/cAGoHEge4CI3S4xrcTJoWlwlhEKYA==}
+    peerDependencies:
+      typescript: 2 || 3 || 4 || 5
+    dependencies:
+      fast-glob: 3.2.12
+      minimatch: 3.1.2
+      normalize-path: 3.0.0
+      tslib: 2.5.0
+      tsutils: 3.21.0_typescript@5.0.2
+      typescript: 5.0.2
+    dev: true
+
+  /type-coverage/2.25.0_typescript@5.0.2:
+    resolution: {integrity: sha512-Zp4x/yQlv5Le8nNR3vXlaZRtPUvtbqSXFpGhcEvocbMxVD359GsQctCUlHgHmT42CURnvRJL0PHIaFlewL64aw==}
+    hasBin: true
+    dependencies:
+      minimist: 1.2.8
+      type-coverage-core: 2.25.0_typescript@5.0.2
+    transitivePeerDependencies:
+      - typescript
     dev: true
 
   /type-detect/4.0.8:
