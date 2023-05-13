@@ -5,8 +5,8 @@ dependencies:
     specifier: ^2.7.1
     version: 2.7.1
   undici:
-    specifier: ^5.22.0
-    version: 5.22.0
+    specifier: ^5.22.1
+    version: 5.22.1
 
 devDependencies:
   '@e9x/simple-socks':
@@ -37,8 +37,8 @@ devDependencies:
     specifier: ^29.1.0
     version: 29.1.0(@babel/core@7.21.4)(jest@29.5.0)(typescript@5.0.4)
   type-coverage:
-    specifier: ^2.25.2
-    version: 2.25.2(typescript@5.0.4)
+    specifier: ^2.25.3
+    version: 2.25.3(typescript@5.0.4)
   typescript:
     specifier: ^5.0.4
     version: 5.0.4
@@ -4096,8 +4096,8 @@ packages:
       prelude-ls: 1.2.1
     dev: true
 
-  /type-coverage-core@2.25.2(typescript@5.0.4):
-    resolution: {integrity: sha512-uf4us+EXtv2t5Uo+aJIOI588UW1epT4Sp7JxozfqbsBvOypd+VhcgnrSxm7Zndy4h3LBbzoXCCBzmI8oZ1u/Qw==}
+  /type-coverage-core@2.25.3(typescript@5.0.4):
+    resolution: {integrity: sha512-wQLM7p9GrDvybDXbfWHT/+bLyKzlh0eRVRovgr2zCQN5QGdVsnpA7HwoaivXLOxqMLC/241xMYDysdbVmbO3BQ==}
     peerDependencies:
       typescript: 2 || 3 || 4 || 5
     dependencies:
@@ -4109,12 +4109,12 @@ packages:
       typescript: 5.0.4
     dev: true
 
-  /type-coverage@2.25.2(typescript@5.0.4):
-    resolution: {integrity: sha512-+RwY80TOXJs7jI1BBnMoqAxuibYxblLk5NJwQEFwUW02ZqkAHav4N1/OjAue8PHu3RaG1pxfNeeuzDmjCcjTNg==}
+  /type-coverage@2.25.3(typescript@5.0.4):
+    resolution: {integrity: sha512-uyFCy+ZHaGENOkL1lTKWxj1QqIIvEXu7K9BFxbgXer7n7Lc07vcrweGdlLIPDYQiHFH585tEnOodq0MCG4iiCA==}
     hasBin: true
     dependencies:
       minimist: 1.2.8
-      type-coverage-core: 2.25.2(typescript@5.0.4)
+      type-coverage-core: 2.25.3(typescript@5.0.4)
     transitivePeerDependencies:
       - typescript
     dev: true
@@ -4153,8 +4153,8 @@ packages:
     hasBin: true
     dev: true
 
-  /undici@5.22.0:
-    resolution: {integrity: sha512-fR9RXCc+6Dxav4P9VV/sp5w3eFiSdOjJYsbtWfd4s5L5C4ogyuVpdKIVHeW0vV1MloM65/f7W45nR9ZxwVdyiA==}
+  /undici@5.22.1:
+    resolution: {integrity: sha512-Ji2IJhFXZY0x/0tVBXeQwgPlLWw13GVzpsWPQ3rV50IFMMof2I55PZZxtm4P6iNq+L5znYN9nSTAq0ZyE6lSJw==}
     engines: {node: '>=14.0'}
     dependencies:
       busboy: 1.6.0
