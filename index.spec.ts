@@ -9,6 +9,10 @@ import { socksConnector, socksDispatcher } from "./index";
 
 const kGlobalDispatcher = Symbol.for("undici.globalDispatcher.1");
 
+declare const global: typeof globalThis & {
+	[kGlobalDispatcher]?: Dispatcher;
+};
+
 function setupHttpServer(options?: MockttpOptions) {
 	const server = getLocal(options);
 	beforeEach(() => server.start());
@@ -236,17 +240,17 @@ it("should set the proxy globally", async () => {
 		port: plainProxy.port,
 	});
 
-	(global as any)[kGlobalDispatcher] = dispatcher;
+	global[kGlobalDispatcher] = dispatcher;
 	try {
 		const inbound = await verifyFetchSuccess(httpServer, dispatcher);
 		expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
 	} finally {
-		delete (global as any)[kGlobalDispatcher];
+		delete global[kGlobalDispatcher];
 	}
 });
 
 it("should proxy WebSocket", async () => {
-	(global as any)[kGlobalDispatcher] = socksDispatcher({
+	global[kGlobalDispatcher] = socksDispatcher({
 		type: 5,
 		host: plainProxy.address,
 		port: plainProxy.port,
@@ -261,6 +265,6 @@ it("should proxy WebSocket", async () => {
 		expect(wsServer.inbound.remotePort).toBe(plainProxy.outbound.localPort);
 	} finally {
 		ws.close();
-		delete (global as any)[kGlobalDispatcher];
+		delete global[kGlobalDispatcher];
 	}
 });
