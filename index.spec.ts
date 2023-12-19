@@ -37,7 +37,7 @@ function setupSocksServer(authenticate?: AuthFn) {
 
 		filter(port: number, host: string, socket: net.Socket) {
 			inbound = socket;
-			return Promise.resolve();
+			return true;
 		},
 	});
 
@@ -83,9 +83,7 @@ const secureServer = setupHttpServer({
 const plainProxy = setupSocksServer();
 
 const secureProxy = setupSocksServer((username, password) => {
-	return username === "foo" && password === "bar"
-		? Promise.resolve()
-		: Promise.reject(new Error("Authenticate failed"));
+	return username === "foo" && password === "bar";
 });
 
 async function verifyFetchFailed(server: Mockttp | string, dispatcher: Dispatcher, cause?: unknown) {
