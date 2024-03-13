@@ -31,7 +31,7 @@
 	},
 	"dependencies": {
 		"socks": "^2.8.1",
-		"undici": "^6.6.2"
+		"undici": "^6.7.1"
 	},
 	"devDependencies": {
 		"@e9x/simple-socks": "1.0.0",
@@ -44,7 +44,7 @@
 		"mockttp": "^3.10.1",
 		"ts-jest": "^29.1.2",
 		"type-coverage": "^2.27.1",
-		"typescript": "^5.3.3",
+		"typescript": "^5.4.2",
 		"ws": "^8.16.0"
 	}
 }
