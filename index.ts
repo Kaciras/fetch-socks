@@ -25,7 +25,7 @@ function resolvePort(protocol: string, port: string) {
  */
 export function socksConnector(proxies: SocksProxies, tlsOpts: TLSOptions = {}): Connector {
 	const chain = Array.isArray(proxies) ? proxies : [proxies];
-	const { timeout = 10e3 } = tlsOpts;
+	const { timeout = 1e4 } = tlsOpts;
 	const undiciConnect = buildConnector(tlsOpts);
 
 	return async (options, callback) => {
@@ -39,7 +39,7 @@ export function socksConnector(proxies: SocksProxies, tlsOpts: TLSOptions = {}):
 				port: resolvePort(protocol, port),
 			} : {
 				port: next.port,
-				host: next.host ?? next.ipaddress,
+				host: next.host ?? next.ipaddress!,
 			};
 
 			const socksOpts = {
