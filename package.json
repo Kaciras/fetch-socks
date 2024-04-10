@@ -18,6 +18,7 @@
 		"index.js",
 		"index.d.ts"
 	],
+	"type": "module",
 	"main": "index.js",
 	"types": "index.d.ts",
 	"typeCoverage": {

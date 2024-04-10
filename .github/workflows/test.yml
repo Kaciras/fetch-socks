@@ -13,13 +13,15 @@ jobs:
         with:
           node-version: latest
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v3
         with:
           version: 8
           run_install: true
 
       - run: pnpm test -- --coverage
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
 
       - run: pnpm run type-coverage
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
