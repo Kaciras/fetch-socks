@@ -40,12 +40,12 @@
 		"@kaciras/eslint-config-core": "^3.2.0",
 		"@kaciras/eslint-config-typescript": "^3.2.0",
 		"@types/ws": "^8.5.12",
-		"eslint": "^9.9.1",
+		"eslint": "^9.10.0",
 		"jest": "^29.7.0",
-		"mockttp": "^3.15.1",
+		"mockttp": "^3.15.2",
 		"ts-jest": "^29.2.5",
 		"type-coverage": "^2.29.1",
-		"typescript": "^5.5.4",
+		"typescript": "^5.6.2",
 		"ws": "^8.18.0"
 	}
 }
