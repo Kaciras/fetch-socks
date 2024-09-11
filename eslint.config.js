@@ -9,7 +9,8 @@ export default [
 	...typescript,
 	{
 		rules: {
-			"kaciras/import-group-sort": "warn",
+			"prefer-const": "off",
+			"kaciras/import-specifier-order": "warn",
 		},
 	},
 ];
