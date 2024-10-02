@@ -1,10 +1,10 @@
 import * as net from "net";
+import { once } from "events";
 import { afterAll, afterEach, beforeEach, expect, it } from "@jest/globals";
 import { WebSocketServer } from "ws";
 import { createProxyServer, waitForConnect } from "@e9x/simple-socks";
 import { getLocal, Mockttp, MockttpOptions } from "mockttp";
 import { Agent, Dispatcher, fetch, WebSocket } from "undici";
-import { MessageEvent } from "undici/types/websocket";
 import { socksConnector, socksDispatcher } from "./index";
 
 const kGlobalDispatcher = Symbol.for("undici.globalDispatcher.1");
@@ -256,10 +256,11 @@ it("should proxy WebSocket", async () => {
 
 	const ws = new WebSocket(`ws://localhost:${wsServer.port}`);
 	try {
-		ws.addEventListener("open", () => ws.send("Hello"));
-		const res = await new Promise<MessageEvent<string>>(resolve => ws.onmessage = resolve);
+		await once(ws as any, "open");
+		ws.send("Hello");
+		const [response] = await once(ws as any, "message");
 
-		expect(res.data).toBe("Hello");
+		expect(response.data).toBe("Hello");
 		expect(wsServer.inbound.remotePort).toBe(plainProxy.outbound.localPort);
 	} finally {
 		ws.close();
