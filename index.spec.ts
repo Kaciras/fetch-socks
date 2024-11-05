@@ -5,7 +5,7 @@ import { once } from "node:events";
 import { WebSocketServer } from "ws";
 import { createProxyServer, waitForConnect } from "@e9x/simple-socks";
 import { getLocal, Mockttp, MockttpOptions } from "mockttp";
-import { Agent, Dispatcher, fetch, WebSocket } from "undici";
+import { Agent, Dispatcher, fetch, MessageEvent, WebSocket } from "undici";
 import { socksConnector, socksDispatcher } from "./index.js";
 
 const kGlobalDispatcher = Symbol.for("undici.globalDispatcher.1");
@@ -259,13 +259,12 @@ it("should proxy WebSocket", async () => {
 
 	const ws = new WebSocket(`ws://localhost:${wsServer.port}`);
 	try {
-		await once(ws as any, "open");
+		await once(ws, "open");
 		ws.send("Hello");
-		const [response] = await once(ws as any, "message");
+		const [response]: Array<MessageEvent<string>> = await once(ws, "message");
 
 		assert.strictEqual(response.data, "Hello");
 		assert.strictEqual(wsServer.inbound.remotePort, plainProxy.outbound.localPort);
-
 	} finally {
 		ws.close();
 		global[kGlobalDispatcher] = undefined;
