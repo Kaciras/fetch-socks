@@ -27,7 +27,7 @@
 	},
 	"scripts": {
 		"lint": "eslint --fix .",
-		"test": "jest",
+		"test": "node --import ts-directly/register --test",
 		"type-coverage": "type-coverage"
 	},
 	"dependencies": {

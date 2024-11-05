@@ -18,9 +18,7 @@ jobs:
           version: latest
           run_install: true
 
-      - run: pnpm test -- --coverage
-        env:
-          NODE_OPTIONS: --experimental-vm-modules
+      - run: pnpm test -- --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info
 
       - run: pnpm run type-coverage
 
