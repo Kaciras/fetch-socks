@@ -23,3 +23,5 @@ jobs:
       - run: pnpm run type-coverage
 
       - uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
