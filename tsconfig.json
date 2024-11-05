@@ -8,6 +8,5 @@
 		"strict": true,
 		"useUnknownInCatchVariables": false,
 		"skipLibCheck": true,
-		"allowSyntheticDefaultImports": true
 	}
 }

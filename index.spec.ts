@@ -1,11 +1,12 @@
-import * as net from "net";
-import { once } from "events";
-import { afterAll, afterEach, beforeEach, expect, it } from "@jest/globals";
+import { after, afterEach, beforeEach, it } from "node:test";
+import * as assert from "assert";
+import * as net from "node:net";
+import { once } from "node:events";
 import { WebSocketServer } from "ws";
 import { createProxyServer, waitForConnect } from "@e9x/simple-socks";
 import { getLocal, Mockttp, MockttpOptions } from "mockttp";
 import { Agent, Dispatcher, fetch, WebSocket } from "undici";
-import { socksConnector, socksDispatcher } from "./index";
+import { socksConnector, socksDispatcher } from "./index.js";
 
 const kGlobalDispatcher = Symbol.for("undici.globalDispatcher.1");
 
@@ -42,7 +43,7 @@ function setupSocksServer(authenticate?: AuthFn) {
 	});
 
 	server.listen();
-	afterAll(() => void server.close());
+	after(() => void server.close());
 
 	return {
 		get inbound() { return inbound; },
@@ -62,7 +63,7 @@ function setupWSServer() {
 		});
 	});
 
-	afterAll(() => void server.close());
+	after(() => void server.close());
 
 	return {
 		get inbound() { return inbound; },
@@ -86,7 +87,7 @@ const secureProxy = setupSocksServer((username, password) => {
 	return username === "foo" && password === "bar";
 });
 
-async function verifyFetchFailed(server: Mockttp | string, dispatcher: Dispatcher, cause?: unknown) {
+async function verifyFetchFailed(server: Mockttp | string, dispatcher: Dispatcher, cause?: RegExp) {
 	if (typeof server !== "string") {
 		await server.forGet("/foobar").thenReply(200, "__RESPONSE_DATA__");
 		server = server.urlFor("/foobar");
@@ -94,9 +95,11 @@ async function verifyFetchFailed(server: Mockttp | string, dispatcher: Dispatche
 
 	const promise = fetch(server, { dispatcher });
 
-	await expect(promise).rejects.toThrow("fetch failed");
-	await expect(promise).rejects.toThrow(TypeError);
-	await expect(promise.catch((e: Error) => { throw e.cause; })).rejects.toThrow(cause);
+	await assert.rejects(promise, new TypeError("fetch failed"));
+	if (cause) {
+		const actualCause = await promise.catch((e: Error) => e.cause);
+		assert.match((actualCause as Error).message, cause);
+	}
 }
 
 async function verifyFetchSuccess(server: Mockttp, dispatcher: Dispatcher) {
@@ -106,7 +109,7 @@ async function verifyFetchSuccess(server: Mockttp, dispatcher: Dispatcher) {
 
 	const r = await fetch(server.urlFor("/foobar"), { dispatcher });
 
-	await expect(r.text()).resolves.toBe("__RESPONSE_DATA__");
+	assert.strictEqual(await r.text(), "__RESPONSE_DATA__");
 	return (await mockedEndpoint.getSeenRequests()).at(-1)!;
 }
 
@@ -124,7 +127,7 @@ it("should throw error if proxy connect timeout", async () => {
 			connect: { timeout: 500 },
 		});
 
-		await verifyFetchFailed(httpServer, dispatcher, "Proxy connection timed out");
+		await verifyFetchFailed(httpServer, dispatcher, /Proxy connection timed out/);
 	} finally {
 		blackHole.close();
 	}
@@ -133,7 +136,7 @@ it("should throw error if proxy connect timeout", async () => {
 it("should throw error if the argument is invalid", async () => {
 	// @ts-expect-error
 	const dispatcher = socksDispatcher([null]);
-	return verifyFetchFailed(httpServer, dispatcher, "Invalid SOCKS proxy details were provided.");
+	return verifyFetchFailed(httpServer, dispatcher, /Invalid SOCKS proxy details were provided/);
 });
 
 it("should throw error if the socks server is unreachable", () => {
@@ -142,7 +145,7 @@ it("should throw error if the socks server is unreachable", () => {
 		host: "::1",
 		port: 111,
 	});
-	return verifyFetchFailed(httpServer, dispatcher, "connect ECONNREFUSED ::1:111");
+	return verifyFetchFailed(httpServer, dispatcher, /connect ECONNREFUSED ::1:111/);
 });
 
 it("should throw error if authenticate failed", async () => {
@@ -166,8 +169,8 @@ it("should throw error if the target is unreachable", async () => {
 	return verifyFetchFailed("http://[::1]:8964", dispatcher, /Socks5 proxy rejected connection/);
 });
 
-it("should connect directly if no proxies are provided", () => {
-	return verifyFetchSuccess(httpServer, socksDispatcher([]));
+it("should connect directly if no proxies are provided", async () => {
+	await verifyFetchSuccess(httpServer, socksDispatcher([]));
 });
 
 it("should connect target through socks", async () => {
@@ -177,7 +180,7 @@ it("should connect target through socks", async () => {
 		port: plainProxy.port,
 	});
 	const inbound = await verifyFetchSuccess(httpServer, dispatcher);
-	expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
+	assert.strictEqual(inbound.remotePort, plainProxy.outbound.localPort);
 });
 
 it("should support proxy chain", async () => {
@@ -195,8 +198,8 @@ it("should support proxy chain", async () => {
 
 	const inbound = await verifyFetchSuccess(httpServer, dispatcher);
 
-	expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
-	expect(plainProxy.inbound.remotePort).toBe(secureProxy.outbound.localPort);
+	assert.strictEqual(inbound.remotePort, plainProxy.outbound.localPort);
+	assert.strictEqual(plainProxy.inbound.remotePort, secureProxy.outbound.localPort);
 });
 
 it("should support TLS over socks", async () => {
@@ -210,7 +213,7 @@ it("should support TLS over socks", async () => {
 		},
 	});
 	const inbound = await verifyFetchSuccess(secureServer, dispatcher);
-	expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
+	assert.strictEqual(inbound.remotePort, plainProxy.outbound.localPort);
 });
 
 it("should do handshake on existing socket", async () => {
@@ -228,7 +231,7 @@ it("should do handshake on existing socket", async () => {
 	});
 
 	const inbound = await verifyFetchSuccess(httpServer, dispatcher);
-	expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
+	assert.strictEqual(inbound.remotePort, plainProxy.outbound.localPort);
 });
 
 it("should set the proxy globally", async () => {
@@ -241,9 +244,9 @@ it("should set the proxy globally", async () => {
 	global[kGlobalDispatcher] = dispatcher;
 	try {
 		const inbound = await verifyFetchSuccess(httpServer, dispatcher);
-		expect(inbound.remotePort).toBe(plainProxy.outbound.localPort);
+		assert.strictEqual(inbound.remotePort, plainProxy.outbound.localPort);
 	} finally {
-		delete global[kGlobalDispatcher];
+		global[kGlobalDispatcher] = undefined;
 	}
 });
 
@@ -260,10 +263,11 @@ it("should proxy WebSocket", async () => {
 		ws.send("Hello");
 		const [response] = await once(ws as any, "message");
 
-		expect(response.data).toBe("Hello");
-		expect(wsServer.inbound.remotePort).toBe(plainProxy.outbound.localPort);
+		assert.strictEqual(response.data, "Hello");
+		assert.strictEqual(wsServer.inbound.remotePort, plainProxy.outbound.localPort);
+
 	} finally {
 		ws.close();
-		delete global[kGlobalDispatcher];
+		global[kGlobalDispatcher] = undefined;
 	}
 });
