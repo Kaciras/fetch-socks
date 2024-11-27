@@ -44,7 +44,7 @@
 		"mockttp": "^3.15.4",
 		"ts-directly": "^2.1.2",
 		"type-coverage": "^2.29.7",
-		"typescript": "^5.6.3",
+		"typescript": "^5.7.2",
 		"ws": "^8.18.0"
 	}
 }
