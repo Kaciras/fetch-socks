@@ -32,7 +32,7 @@
 	},
 	"dependencies": {
 		"socks": "^2.8.2",
-		"undici": "^6.21.0"
+		"undici": ">=6"
 	},
 	"devDependencies": {
 		"@e9x/simple-socks": "1.0.0",
