@@ -30,7 +30,7 @@
 		"type-coverage": "type-coverage"
 	},
 	"dependencies": {
-		"socks": "^2.8.2",
+		"socks": "^2.8.4",
 		"undici": "^7.3.0"
 	},
 	"devDependencies": {
@@ -39,7 +39,7 @@
 		"@kaciras/eslint-config-core": "^3.2.1",
 		"@kaciras/eslint-config-typescript": "^3.2.1",
 		"@types/ws": "^8.5.14",
-		"eslint": "^9.18.0",
+		"eslint": "^9.20.1",
 		"mockttp": "^3.15.4",
 		"ts-directly": "^2.1.2",
 		"type-coverage": "^2.29.7",
