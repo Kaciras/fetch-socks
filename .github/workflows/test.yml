@@ -18,7 +18,7 @@ jobs:
           version: latest
           run_install: true
 
-      - run: pnpm test -- --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info
+      - run: pnpm test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info
 
       - run: pnpm run type-coverage
 
