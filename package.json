@@ -30,16 +30,16 @@
 		"type-coverage": "type-coverage"
 	},
 	"dependencies": {
-		"socks": "^2.8.4",
+		"socks": "^2.8.5",
 		"undici": "^7.10.0"
 	},
 	"devDependencies": {
 		"@e9x/simple-socks": "1.0.0",
-		"@jest/globals": "30.0.0-beta.3",
+		"@jest/globals": "30.0.0",
 		"@kaciras/eslint-config-core": "^3.3.0",
 		"@kaciras/eslint-config-typescript": "^3.3.0",
 		"@types/ws": "^8.18.0",
-		"eslint": "^9.28.0",
+		"eslint": "^9.29.0",
 		"mockttp": "^3.17.1",
 		"ts-directly": "^2.1.2",
 		"type-coverage": "^2.29.7",
