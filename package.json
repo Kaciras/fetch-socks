@@ -31,19 +31,19 @@
 	},
 	"dependencies": {
 		"socks": "^2.8.5",
-		"undici": "^7.10.0"
+		"undici": "^7.11.0"
 	},
 	"devDependencies": {
 		"@e9x/simple-socks": "1.0.0",
-		"@jest/globals": "30.0.2",
+		"@jest/globals": "30.0.3",
 		"@kaciras/eslint-config-core": "^3.3.0",
 		"@kaciras/eslint-config-typescript": "^3.3.0",
 		"@types/ws": "^8.18.0",
-		"eslint": "^9.29.0",
+		"eslint": "^9.30.0",
 		"mockttp": "^4.0.1",
 		"ts-directly": "^2.1.2",
 		"type-coverage": "^2.29.7",
 		"typescript": "^5.8.3",
-		"ws": "^8.18.2"
+		"ws": "^8.18.3"
 	}
 }
