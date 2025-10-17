@@ -36,14 +36,14 @@
 	"devDependencies": {
 		"@e9x/simple-socks": "1.0.0",
 		"@jest/globals": "30.2.0",
-		"@kaciras/eslint-config-core": "^3.3.0",
-		"@kaciras/eslint-config-typescript": "^3.3.0",
+		"@kaciras/eslint-config-core": "^3.4.0",
+		"@kaciras/eslint-config-typescript": "^3.4.0",
 		"@types/ws": "^8.18.0",
-		"eslint": "^9.36.0",
-		"mockttp": "^4.1.0",
+		"eslint": "^9.37.0",
+		"mockttp": "^4.2.0",
 		"ts-directly": "^2.1.2",
 		"type-coverage": "^2.29.7",
-		"typescript": "^5.9.2",
+		"typescript": "^5.9.3",
 		"ws": "^8.18.3"
 	}
 }
