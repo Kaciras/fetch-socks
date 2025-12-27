@@ -7,6 +7,6 @@
 		"declaration": true,
 		"strict": true,
 		"useUnknownInCatchVariables": false,
-		"skipLibCheck": true,
+		"skipLibCheck": true
 	}
 }

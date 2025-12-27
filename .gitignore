@@ -19,7 +19,7 @@ coverage/
 *.js.map
 *.d.ts
 /index.js
-/index.spec.js
+/index.test.js
 
 # stryker temp files
 /stryker-tmp
