@@ -31,18 +31,18 @@
 	},
 	"dependencies": {
 		"socks": "^2.8.7",
-		"undici": "^7.22.0"
+		"undici": "^7.24.5"
 	},
 	"devDependencies": {
 		"@e9x/simple-socks": "1.0.0",
 		"@kaciras/eslint-config-core": "^3.4.2",
 		"@kaciras/eslint-config-typescript": "^3.4.2",
 		"@types/ws": "^8.18.0",
-		"eslint": "^10.0.3",
+		"eslint": "^10.1.0",
 		"mockttp": "^4.2.3",
 		"ts-directly": "^2.1.2",
 		"type-coverage": "^2.29.7",
-		"typescript": "^5.9.3",
-		"ws": "^8.19.0"
+		"typescript": "^6.0.2",
+		"ws": "^8.20.0"
 	}
 }
