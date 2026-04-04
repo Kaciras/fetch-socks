@@ -8,7 +8,7 @@ import { getLocal, Mockttp, MockttpOptions } from "mockttp";
 import { Agent, Dispatcher, fetch, MessageEvent, WebSocket } from "undici";
 import { socksConnector, socksDispatcher } from "./index.js";
 
-const kGlobalDispatcher = Symbol.for("undici.globalDispatcher.1");
+const kGlobalDispatcher = Symbol.for("undici.globalDispatcher.2");
 
 declare const global: typeof globalThis & {
 	[kGlobalDispatcher]?: Dispatcher;

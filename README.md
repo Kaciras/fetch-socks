@@ -39,7 +39,11 @@ import { socksDispatcher } from "fetch-socks";
 
 const dispatcher = socksDispatcher({ /* ... */});
 
+// For undici <= 7
 global[Symbol.for("undici.globalDispatcher.1")] = dispatcher;
+
+// For undici >= 8
+global[Symbol.for("undici.globalDispatcher.2")] = dispatcher;
 ````
 
 TypeScript example, fetch through proxy chain with two SOCKS proxies.
