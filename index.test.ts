@@ -247,23 +247,36 @@ it("should set the proxy globally", async () => {
 	}
 });
 
-it("should proxy WebSocket", async () => {
-	global[kGlobalDispatcher] = socksDispatcher({
-		type: 5,
-		host: plainProxy.address,
-		port: plainProxy.port,
-	});
-
-	const ws = new WebSocket(`ws://localhost:${wsServer.port}`);
+async function verifyWSProxied(ws: WebSocket) {
 	try {
+		const nonce = Math.random().toString(36).slice(2);
 		await once(ws, "open");
-		ws.send("Hello");
+		ws.send(nonce);
 		const [response]: Array<MessageEvent<string>> = await once(ws, "message");
 
-		assert.strictEqual(response.data, "Hello");
+		assert.strictEqual(response.data, nonce);
 		assert.strictEqual(wsServer.inbound.remotePort, plainProxy.outbound.localPort);
 	} finally {
 		ws.close();
 		global[kGlobalDispatcher] = undefined;
 	}
+}
+
+it("should proxy WebSocket", async () => {
+	const dispatcher = socksDispatcher({
+		type: 5,
+		host: plainProxy.address,
+		port: plainProxy.port,
+	});
+
+	return verifyWSProxied(new WebSocket(`ws://localhost:${wsServer.port}`, { dispatcher }));
+});
+
+it("should set the proxy globally for WebSocket", async () => {
+	global[kGlobalDispatcher] = socksDispatcher({
+		type: 5,
+		host: plainProxy.address,
+		port: plainProxy.port,
+	});
+	return verifyWSProxied(new WebSocket(`ws://localhost:${wsServer.port}`));
 });

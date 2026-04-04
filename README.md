@@ -27,7 +27,7 @@ const dispatcher = socksDispatcher({
     //password: "password",
 });
 
-const response = await fetch("http://example.com", { dispatcher });
+const response = await fetch("https://example.com", { dispatcher });
 console.log(response.status);
 console.log(await response.text());
 ```
@@ -97,6 +97,15 @@ async function connect(options, callback) {
 
 const dispatcher = new Agent({ connect });
 const response = await fetch("https://example.com", { dispatcher });
+```
+
+It also can proxy WebSocket:
+
+```javascript
+import { socksDispatcher } from "fetch-socks";
+
+const dispatcher = socksDispatcher({ /* ... */});
+const ws = new WebSocket(`ws://example.com`, { dispatcher });
 ```
 
 # API
