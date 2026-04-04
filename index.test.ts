@@ -101,7 +101,7 @@ async function verifyFetchFailed(server: Mockttp | string, dispatcher: Dispatche
 	}
 }
 
-async function verifyFetchSuccess(server: Mockttp, dispatcher: Dispatcher) {
+async function verifyFetchSuccess(server: Mockttp, dispatcher?: Dispatcher) {
 	const mockedEndpoint = await server
 		.forGet("/foobar")
 		.thenReply(200, "__RESPONSE_DATA__");
@@ -234,15 +234,13 @@ it("should do handshake on existing socket", async () => {
 });
 
 it("should set the proxy globally", async () => {
-	const dispatcher = socksDispatcher({
+	global[kGlobalDispatcher] = socksDispatcher({
 		type: 5,
 		host: plainProxy.address,
 		port: plainProxy.port,
 	});
-
-	global[kGlobalDispatcher] = dispatcher;
 	try {
-		const inbound = await verifyFetchSuccess(httpServer, dispatcher);
+		const inbound = await verifyFetchSuccess(httpServer);
 		assert.strictEqual(inbound.remotePort, plainProxy.outbound.localPort);
 	} finally {
 		global[kGlobalDispatcher] = undefined;
