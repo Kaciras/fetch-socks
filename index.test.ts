@@ -1,4 +1,4 @@
-import { after, afterEach, beforeEach, it } from "node:test";
+import { after, afterEach, before, beforeEach, it } from "node:test";
 import * as assert from "assert";
 import * as net from "node:net";
 import { once } from "node:events";
@@ -36,13 +36,12 @@ function setupSocksServer(authenticate?: AuthFn) {
 			return outbound;
 		},
 
-		filter(port: number, host: string, socket: net.Socket) {
-			inbound = socket;
-			return true;
+		filter(_: number, __: string, socket: net.Socket) {
+			return Boolean(inbound = socket);
 		},
 	});
 
-	server.listen();
+	before((_, done) => server.listen(undefined, done));
 	after(() => void server.close());
 
 	return {
