@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/Kaciras/fetch-socks/branch/master/graph/badge.svg?token=DJLSKIKYBJ)](https://codecov.io/gh/Kaciras/fetch-socks)
 [![type-coverage](https://img.shields.io/badge/dynamic/json?label=type-coverage&prefix=%E2%89%A5&query=%24.typeCoverage.atLeast&suffix=%25&url=https%3A%2F%2Fraw.githubusercontent.com%2FKaciras%2Ffetch-socks%2Fmaster%2Fpackage.json)](https://github.com/plantain-00/type-coverage)
 
-Socks proxy for Node builtin (also [undici](https://github.com/nodejs/undici)) `fetch`.
+Socks proxy for Node builtin (also [undici](https://github.com/nodejs/undici)) `fetch` and `WebSocket`.
 
 ```shell
 npm install fetch-socks
