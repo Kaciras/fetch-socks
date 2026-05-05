@@ -1,7 +1,6 @@
 {
 	"compilerOptions": {
 		"module": "CommonJS",
-		"moduleResolution": "Node",
 		"lib": ["ESNext"],
 		"declaration": true,
 		"useUnknownInCatchVariables": false,
