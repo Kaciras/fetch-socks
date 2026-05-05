@@ -26,6 +26,7 @@
 	},
 	"scripts": {
 		"lint": "eslint --fix .",
+		"compile": "tsc",
 		"test": "node --import ts-directly/register --test",
 		"type-coverage": "type-coverage"
 	},
