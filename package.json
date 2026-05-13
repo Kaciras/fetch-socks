@@ -26,12 +26,11 @@
 	},
 	"scripts": {
 		"lint": "eslint --fix .",
-		"compile": "tsc",
-		"test": "node --import ts-directly/register --test",
+		"test": "node --no-strip-types --import ts-directly/register --test *.test.ts",
 		"type-coverage": "type-coverage"
 	},
 	"dependencies": {
-		"socks": "^2.8.8",
+		"socks": "^2.8.9",
 		"undici": "^8.2.0"
 	},
 	"devDependencies": {
@@ -40,10 +39,10 @@
 		"@kaciras/eslint-config-typescript": "^3.4.2",
 		"@types/ws": "^8.18.0",
 		"eslint": "^10.3.0",
-		"mockttp": "^4.3.1",
+		"mockttp": "^4.4.1",
 		"ts-directly": "^2.1.2",
 		"type-coverage": "^2.29.7",
 		"typescript": "^6.0.3",
-		"ws": "^8.20.0"
+		"ws": "^8.20.1"
 	}
 }
