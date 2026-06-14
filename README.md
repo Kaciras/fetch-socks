@@ -7,6 +7,8 @@
 
 Socks proxy for Node builtin (also [undici](https://github.com/nodejs/undici)) `fetch` and `WebSocket`.
 
+**Deprecated**: use [undici builtin Socks5ProxyAgent](https://undici.nodejs.org/#/docs/api/Socks5ProxyAgent.md) instead.
+
 ```shell
 npm install fetch-socks
 ```
@@ -22,7 +24,6 @@ const dispatcher = socksDispatcher({
     type: 5,
     host: "::1",
     port: 1080,
-
     //userId: "username",
     //password: "password",
 });

@@ -13,17 +13,15 @@ jobs:
         with:
           node-version: latest
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@v6
         with:
           version: latest
           run_install: true
-
-      - run: pnpm run compile
 
       - run: pnpm test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info
 
       - run: pnpm run type-coverage
 
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
