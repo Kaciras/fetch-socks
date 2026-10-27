@@ -16,9 +16,10 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           version: latest
-          run_install: true
 
       - run: pnpm --global config set dangerouslyAllowAllBuilds=true
+
+      - run: pnpm install
 
       - run: pnpm test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=lcov.info
 
