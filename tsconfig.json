@@ -4,6 +4,9 @@
 		"lib": ["ESNext"],
 		"declaration": true,
 		"useUnknownInCatchVariables": false,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"allowImportingTsExtensions": true,
+		"rewriteRelativeImportExtensions": true
 	}
 }

@@ -1,7 +1,8 @@
-import { SocksClient, SocksProxy } from "socks";
+import { SocksClient, type SocksProxy } from "socks";
 import { Agent, buildConnector } from "undici";
-import Connector = buildConnector.connector;
-import TLSOptions = buildConnector.BuildOptions;
+
+type Connector = buildConnector.connector;
+type TLSOptions = buildConnector.BuildOptions;
 
 export type SocksProxies = SocksProxy | SocksProxy[];
 

@@ -1,12 +1,13 @@
+import type { Mockttp, MockttpOptions } from "mockttp";
+import { getLocal } from "mockttp";
 import { after, afterEach, before, beforeEach, it } from "node:test";
 import * as assert from "assert";
 import * as net from "node:net";
 import { once } from "node:events";
 import { WebSocketServer } from "ws";
 import { createProxyServer, waitForConnect } from "@e9x/simple-socks";
-import { getLocal, Mockttp, MockttpOptions } from "mockttp";
 import { Agent, Dispatcher, fetch, MessageEvent, WebSocket } from "undici";
-import { socksConnector, socksDispatcher } from "./index.js";
+import { socksConnector, socksDispatcher } from "./index.ts";
 
 const kGlobalDispatcher = Symbol.for("undici.globalDispatcher.2");
 
