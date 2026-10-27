@@ -18,6 +18,7 @@
 		"index.js",
 		"index.d.ts"
 	],
+	"type": "commonjs",
 	"main": "index.js",
 	"types": "index.d.ts",
 	"typeCoverage": {
@@ -26,7 +27,7 @@
 	},
 	"scripts": {
 		"lint": "eslint --fix .",
-		"test": "node --no-strip-types --import ts-directly/register --test *.test.ts",
+		"test": "node --test index.test.mts",
 		"type-coverage": "type-coverage"
 	},
 	"dependencies": {
@@ -40,7 +41,6 @@
 		"@types/ws": "^8.18.2",
 		"eslint": "^10.13.0",
 		"mockttp": "^4.6.4",
-		"ts-directly": "^2.1.2",
 		"type-coverage": "^2.30.4",
 		"typescript": "^7.0.2",
 		"ws": "^8.22.0"
